@@ -1,0 +1,911 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MISSION 20.11 — Classified</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+
+:root{
+--cyan:#64f8ed;
+--blue:#62aaff;
+--purple:#a78bfa;
+--gold:#ffdc91;
+--bg:#050813;
+--panel:rgba(11,22,42,.78);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+margin:0;
+background:var(--bg);
+color:#e4f4ff;
+font-family:'Be Vietnam Pro',sans-serif;
+overflow-x:hidden;
+}
+button{font:inherit;cursor:pointer}
+#space{
+position:fixed;inset:0;z-index:-3;
+background:
+radial-gradient(ellipse at 20% 20%,#12345166,transparent 45%),
+radial-gradient(ellipse at 80% 75%,#39245d55,transparent 45%),
+linear-gradient(135deg,#050813,#091426 55%,#080916);
+}
+#stars,#particles{
+position:fixed;inset:0;pointer-events:none;z-index:-2;
+}
+.star{
+position:absolute;width:2px;height:2px;
+background:#b5ffff;border-radius:50%;
+animation:twinkle 2s infinite alternate;
+box-shadow:0 0 8px #64f8ed;
+}
+@keyframes twinkle{to{opacity:.12;transform:scale(.5)}}
+
+.orb{
+position:fixed;width:350px;height:350px;border-radius:50%;
+filter:blur(100px);opacity:.12;pointer-events:none;
+animation:orb 12s infinite alternate;
+}
+.orb.one{background:#00e5ff;top:-150px;left:-120px}
+.orb.two{background:#9b5cff;bottom:-150px;right:-100px;animation-delay:-5s}
+@keyframes orb{to{transform:translate(100px,100px) scale(1.4)}}
+
+.gridbg{
+position:fixed;inset:0;z-index:-1;pointer-events:none;
+background-image:
+linear-gradient(#56d8ff08 1px,transparent 1px),
+linear-gradient(90deg,#56d8ff08 1px,transparent 1px);
+background-size:55px 55px;
+mask-image:linear-gradient(transparent,black 30%,black 80%,transparent);
+}
+
+.screen{
+display:none;min-height:100vh;
+align-items:center;justify-content:center;
+flex-direction:column;padding:75px 18px 35px;
+animation:screenIn .65s ease;
+}
+.screen.active{display:flex}
+@keyframes screenIn{
+from{opacity:0;transform:translateY(18px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+.font-tech{font-family:'Orbitron',sans-serif}
+.tag{
+font-family:'Orbitron',sans-serif;
+font-size:10px;letter-spacing:3px;
+color:var(--cyan);
+text-transform:uppercase;
+}
+.muted{color:#8096b5}
+.glow{
+text-shadow:0 0 20px #64f8ed88,0 0 50px #64f8ed33;
+}
+.panel{
+width:min(720px,100%);
+padding:clamp(24px,5vw,48px);
+background:linear-gradient(145deg,#101d35df,#091326e8);
+border:1px solid #64f8ed44;
+border-radius:18px;
+box-shadow:0 20px 80px #0008,inset 0 0 40px #64f8ed08;
+position:relative;
+overflow:hidden;
+backdrop-filter:blur(16px);
+}
+.panel:before{
+content:"";position:absolute;top:0;left:0;width:100%;height:2px;
+background:linear-gradient(90deg,transparent,var(--cyan),var(--purple),transparent);
+}
+.panel:after{
+content:"";position:absolute;right:-80px;top:-100px;
+width:200px;height:200px;border-radius:50%;
+background:#64f8ed0a;filter:blur(15px);
+pointer-events:none;
+}
+.btn{
+border:1px solid #64f8ed88;
+background:linear-gradient(110deg,#103447,#17294b);
+color:var(--cyan);
+padding:15px 25px;
+font-family:'Orbitron',sans-serif;
+font-size:11px;letter-spacing:1.5px;
+border-radius:7px;
+transition:.3s;
+position:relative;
+overflow:hidden;
+}
+.btn:hover{
+transform:translateY(-4px);
+box-shadow:0 0 30px #64f8ed44;
+border-color:var(--cyan);
+}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn:active{transform:scale(.97)}
+h1,h2,h3{font-family:'Orbitron',sans-serif;font-weight:500}
+p{font-size:13px;line-height:2;color:#a9bad2}
+
+.statusbar{
+position:fixed;top:0;left:0;width:100%;
+display:flex;justify-content:space-between;
+align-items:center;padding:15px 22px;
+background:#050813aa;backdrop-filter:blur(12px);
+border-bottom:1px solid #ffffff12;z-index:20;
+font:9px 'Orbitron',sans-serif;letter-spacing:1px;
+color:#83a3bd;
+}
+.statusbar strong{color:var(--cyan)}
+.status-dot{
+display:inline-block;width:7px;height:7px;
+border-radius:50%;background:#5bffb3;
+box-shadow:0 0 10px #5bffb3;margin-right:7px;
+}
+#music{
+position:fixed;right:18px;bottom:18px;z-index:30;
+border:1px solid #64f8ed66;background:#0b1c30dd;
+color:var(--cyan);padding:12px 17px;border-radius:30px;
+font:10px 'Orbitron',sans-serif;
+backdrop-filter:blur(12px);
+}
+#music:hover{box-shadow:0 0 20px #64f8ed55}
+
+/* BOOT */
+#boot{text-align:center}
+.boot-icon{
+width:100px;height:100px;margin:15px auto 25px;
+border:1px solid #64f8ed77;border-radius:50%;
+display:grid;place-items:center;font-size:43px;
+color:var(--cyan);
+box-shadow:0 0 30px #64f8ed33,inset 0 0 25px #64f8ed22;
+animation:rotate 12s linear infinite;
+}
+@keyframes rotate{to{transform:rotate(360deg)}}
+.boot-icon span{animation:rotate 12s linear infinite reverse}
+.boot-title{
+font-size:clamp(42px,10vw,83px);
+line-height:1.2;margin:18px 0;
+color:#d8ffff;
+letter-spacing:-3px;
+}
+.boot-title span{
+color:var(--cyan);
+text-shadow:0 0 30px #64f8ed77;
+}
+.boot-sub{letter-spacing:5px;font:10px 'Orbitron',sans-serif;color:#8ba9c2}
+#terminal{
+text-align:left;color:#73d9d8;
+font:11px/2 'Orbitron',sans-serif;
+min-height:120px;margin:25px auto;
+max-width:430px;padding:15px;
+border-left:2px solid var(--cyan);
+background:#64f8ed08;
+white-space:pre-line;
+}
+.scan{
+height:2px;width:100%;background:#1a3448;
+margin:20px 0;overflow:hidden;
+}
+.scan:after{
+content:"";display:block;width:35%;height:100%;
+background:var(--cyan);box-shadow:0 0 15px var(--cyan);
+animation:scan 2s infinite;
+}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+
+/* MISSION */
+#mission{text-align:center}
+.section-title{
+font-size:clamp(25px,5vw,39px);
+margin:18px 0 8px;color:#e3faff;
+}
+.mission-info{max-width:520px;margin:0 auto 30px}
+.cards{
+width:min(900px,100%);
+display:grid;grid-template-columns:repeat(3,1fr);
+gap:17px;margin:20px 0 30px;
+}
+.task{
+position:relative;text-align:left;
+min-height:205px;padding:24px 18px;
+background:linear-gradient(145deg,#13243cdd,#091427dd);
+border:1px solid #41627d55;
+border-radius:12px;
+transition:.35s;cursor:pointer;overflow:hidden;
+}
+.task:before{
+content:"";position:absolute;bottom:0;left:0;
+height:2px;width:0;background:var(--cyan);
+transition:.4s;
+}
+.task:hover{
+transform:translateY(-8px);
+border-color:#64f8ed99;
+box-shadow:0 15px 40px #0006,0 0 25px #64f8ed15;
+}
+.task:hover:before{width:100%}
+.task.done{
+border-color:#5bffb3;background:#0b302b99;
+}
+.task.done:before{width:100%;background:#5bffb3}
+.task .icon{
+font-size:36px;margin-bottom:23px;
+filter:drop-shadow(0 0 12px #64f8ed55);
+}
+.task .number{
+font:10px 'Orbitron',sans-serif;
+color:var(--cyan);letter-spacing:2px;
+}
+.task h3{font-size:13px;color:#e4f6ff;margin:10px 0}
+.task small{font-size:10px;color:#8099b5}
+.task .lock{
+position:absolute;right:17px;top:18px;color:#607d99;
+}
+.progress-wrap{width:min(450px,100%);margin:5px auto 25px}
+.progress-head{
+display:flex;justify-content:space-between;
+font:10px 'Orbitron',sans-serif;color:#8ca9c1;
+margin-bottom:10px;
+}
+.progress{
+height:7px;background:#1c2c40;
+border-radius:10px;overflow:hidden;
+}
+#bar{
+height:100%;width:0%;
+background:linear-gradient(90deg,#42bfff,#64f8ed,#b1fff0);
+box-shadow:0 0 15px #64f8ed;
+transition:.6s;
+border-radius:10px;
+}
+#treasureBtn{margin-top:8px}
+
+/* CHALLENGE */
+.challenge-card{
+width:min(600px,100%);
+padding:clamp(25px,5vw,42px);
+border:1px solid #64f8ed55;
+border-radius:15px;
+background:linear-gradient(145deg,#10223aee,#081426f5);
+box-shadow:0 20px 70px #0008,0 0 35px #64f8ed0c;
+text-align:center;
+}
+.question-meta{
+display:flex;justify-content:space-between;
+font:9px 'Orbitron',sans-serif;color:#8aa9c5;
+margin-bottom:25px;
+}
+.question-line{
+height:3px;background:#1d344b;
+margin-bottom:30px;border-radius:5px;
+}
+.question-line span{
+display:block;width:33.33%;height:100%;
+background:var(--cyan);box-shadow:0 0 10px var(--cyan);
+transition:.4s;
+}
+#qtitle{font-size:clamp(19px,4vw,27px);color:#dffcff}
+#question{
+font-size:15px;line-height:2;
+color:#c4d6ed;margin:25px 0;
+}
+.answers{display:grid;gap:12px}
+.answers button{
+padding:16px 17px;text-align:left;
+border:1px solid #34506c;
+background:#10243c;color:#c9e1f5;
+border-radius:8px;font-size:12px;
+transition:.25s;
+}
+.answers button:hover{
+border-color:var(--cyan);
+background:#15364b;
+transform:translateX(5px);
+}
+.answers button.correct{
+border-color:#5bffb3;background:#0d493b;color:#aaffd7;
+}
+.answers button.wrong{
+border-color:#ff6e91;background:#491b32;color:#ffb5c6;
+}
+.answers button:disabled{cursor:default}
+#result{
+min-height:32px;margin-top:17px;
+font-size:12px;color:var(--gold);
+}
+.shake{animation:shake .35s}
+@keyframes shake{
+25%{transform:translateX(-7px)}
+50%{transform:translateX(7px)}
+75%{transform:translateX(-4px)}
+}
+
+/* UNLOCK */
+.unlock-circle{
+width:160px;height:160px;
+border:1px solid #64f8ed88;border-radius:50%;
+display:grid;place-items:center;
+font-size:65px;margin:25px auto;
+box-shadow:0 0 35px #64f8ed33,inset 0 0 35px #64f8ed22;
+animation:pulse 2s infinite;
+}
+@keyframes pulse{
+50%{box-shadow:0 0 65px #64f8ed77,inset 0 0 45px #64f8ed33;transform:scale(1.04)}
+}
+.gift{
+font-size:110px;cursor:pointer;
+filter:drop-shadow(0 0 25px #ffcf7b);
+animation:giftFloat 2s infinite ease-in-out;
+transition:.4s;
+}
+.gift:hover{transform:scale(1.2) rotate(8deg)}
+@keyframes giftFloat{50%{transform:translateY(-15px)}}
+#treasure{text-align:center}
+.gift-hint{color:var(--gold);font-size:11px;letter-spacing:2px}
+
+/* FINAL */
+#final .panel{text-align:center;width:min(720px,100%)}
+.trophy{font-size:65px;margin:20px}
+#final h2{
+font-size:clamp(30px,7vw,53px);
+color:var(--gold);
+text-shadow:0 0 25px #ffdc9177;
+}
+.letter{
+margin:25px 0;padding:25px;
+text-align:left;
+border:1px solid #e4c17b44;
+border-radius:10px;
+background:linear-gradient(145deg,#302a2a55,#161b2b88);
+}
+.letter p{line-height:2.3;color:#d9d7d0;font-size:13px}
+.letter-title{
+text-align:center;color:var(--gold);
+font:12px 'Orbitron',sans-serif;letter-spacing:2px;
+margin-bottom:20px;
+}
+.signature{
+text-align:right!important;color:var(--gold)!important;
+font-style:italic;
+}
+.final-code{
+color:var(--cyan);font:10px/2 'Orbitron',sans-serif;
+letter-spacing:1px;margin:20px 0;
+}
+.back{
+position:fixed;left:18px;top:65px;
+border:1px solid #64f8ed55;
+background:#09182c;color:var(--cyan);
+padding:10px 14px;border-radius:6px;
+font:9px 'Orbitron',sans-serif;z-index:10;
+}
+.hidden{display:none!important}
+
+/* MODAL */
+#modal{
+position:fixed;inset:0;z-index:50;
+display:none;align-items:center;justify-content:center;
+padding:20px;background:#020610dc;
+backdrop-filter:blur(10px);
+}
+#modal.show{display:flex;animation:screenIn .3s}
+.modalbox{
+width:min(420px,100%);
+background:#101f35;border:1px solid #64f8ed77;
+border-radius:15px;padding:30px;text-align:center;
+box-shadow:0 0 50px #64f8ed22;
+}
+.modalbox h2{font-size:21px;color:var(--cyan)}
+.modalbox .symbol{font-size:45px}
+#modalText{line-height:2}
+
+#flash{
+position:fixed;inset:0;pointer-events:none;z-index:40;
+background:#64f8ed;opacity:0;
+}
+#flash.active{animation:flash .5s}
+@keyframes flash{30%{opacity:.2}100%{opacity:0}}
+
+#fireworks{
+position:fixed;inset:0;pointer-events:none;
+z-index:15;
+}
+
+@media(max-width:650px){
+.cards{grid-template-columns:1fr}
+.task{min-height:120px;padding:18px;display:grid;grid-template-columns:55px 1fr;align-items:center}
+.task .icon{grid-row:span 2;margin:0;font-size:30px}
+.task h3{margin:5px 0}
+.task small{grid-column:2}
+.task .lock{right:18px;top:45px}
+.statusbar{padding:13px 12px;font-size:8px}
+.boot-sub{letter-spacing:2px}
+.back{top:60px}
+}
+</style>
+</head>
+
+<body>
+<div id="space"></div>
+<div id="stars"></div>
+<div class="orb one"></div>
+<div class="orb two"></div>
+<div class="gridbg"></div>
+<div id="flash"></div>
+<canvas id="fireworks"></canvas>
+
+<div class="statusbar">
+<div><span class="status-dot"></span>SYSTEM <strong>ONLINE</strong></div>
+<div>PROJECT: 20.11</div>
+<div id="clock">00:00:00</div>
+</div>
+
+<button id="music" onclick="musicToggle()">♫ SOUND: OFF</button>
+
+<!-- BOOT -->
+<section class="screen active" id="boot">
+<div class="panel" style="text-align:center">
+<div class="tag">✦ CLASSIFIED TRANSMISSION ✦</div>
+<div class="boot-icon"><span>⌘</span></div>
+<div class="boot-sub">A SPECIAL MISSION FOR A SPECIAL PERSON</div>
+<h1 class="boot-title font-tech">MISSION<br><span>20.11</span></h1>
+<div class="scan"></div>
+<div id="terminal"></div>
+<button class="btn" id="start" disabled onclick="begin()">INITIALIZE SYSTEM →</button>
+<p style="font:9px 'Orbitron',sans-serif;color:#587b9d;margin-top:25px">
+ENCRYPTED MESSAGE // ONLY FOR OUR TEACHER
+</p>
+</div>
+</section>
+
+<!-- MISSION -->
+<section class="screen" id="mission">
+<div class="tag">MISSION CONTROL // 001</div>
+<h2 class="section-title">THE APPRECIATION PROJECT</h2>
+<p class="mission-info" style="text-align:center">
+Một hệ thống đang lưu giữ 3 dữ liệu bí mật.<br>
+Mỗi dữ liệu là một thông điệp dành riêng cho thầy.<br>
+<strong style="color:var(--cyan)">Hãy hoàn thành tất cả nhiệm vụ để mở kho báu!</strong>
+</p>
+
+<div class="cards">
+<div class="task" id="task0" onclick="challenge(0)">
+<div class="icon">📡</div>
+<div class="number">DATA 01</div>
+<h3>THE KNOWLEDGE</h3>
+<small>Khám phá giá trị tri thức</small>
+<span class="lock">🔒</span>
+</div>
+
+<div class="task" id="task1" onclick="challenge(1)">
+<div class="icon">💎</div>
+<div class="number">DATA 02</div>
+<h3>THE GRATITUDE</h3>
+<small>Lời cảm ơn chưa nói</small>
+<span class="lock">🔒</span>
+</div>
+
+<div class="task" id="task2" onclick="challenge(2)">
+<div class="icon">🚀</div>
+<div class="number">DATA 03</div>
+<h3>THE WISH</h3>
+<small>Điều ước đặc biệt</small>
+<span class="lock">🔒</span>
+</div>
+</div>
+
+<div class="progress-wrap">
+<div class="progress-head">
+<span>SYSTEM PROGRESS</span>
+<span id="progressText">0 / 3 UNLOCKED</span>
+</div>
+<div class="progress"><div id="bar"></div></div>
+</div>
+
+<button class="btn" id="treasureBtn" onclick="go('treasure')" disabled>
+ACCESS THE TREASURE 🔒
+</button>
+</section>
+
+<!-- CHALLENGE -->
+<section class="screen" id="challenge">
+<div class="challenge-card">
+<div class="question-meta">
+<span id="qtag">DATA 01</span>
+<span id="qcount">QUESTION 01 / 03</span>
+</div>
+<div class="question-line"><span id="qprogress"></span></div>
+<div class="tag">SECURITY VERIFICATION</div>
+<h2 id="qtitle">SYSTEM CHALLENGE</h2>
+<p id="question"></p>
+<div class="answers" id="answers"></div>
+<div id="result"></div>
+</div>
+</section>
+
+<!-- TREASURE -->
+<section class="screen" id="treasure">
+<div class="tag">ALL DATA SUCCESSFULLY RECOVERED</div>
+<div class="unlock-circle">🔓</div>
+<h2 class="font-tech" style="color:var(--cyan)">ACCESS GRANTED</h2>
+<p style="text-align:center">
+Tất cả dữ liệu đã được giải mã.<br>
+Một món quà đang chờ thầy ở phía sau...
+</p>
+<div class="gift" onclick="openGift()">🎁</div>
+<div class="gift-hint">TAP THE GIFT TO UNLOCK</div>
+<p style="font-size:10px">WARNING: CONTAINS A LOT OF GRATITUDE ❤️</p>
+<button class="btn" onclick="openGift()">OPEN THE GIFT ✨</button>
+</section>
+
+<!-- FINAL -->
+<section class="screen" id="final">
+<div class="panel">
+<div class="tag">MISSION COMPLETED // 20.11</div>
+<div class="trophy">🏆</div>
+<h2>THANK YOU,<br>TEACHER!</h2>
+<p style="color:var(--gold)">A SPECIAL MESSAGE HAS BEEN UNLOCKED</p>
+
+<div class="letter">
+<div class="letter-title">✦ GỬI THẦY KÍNH MẾN ✦</div>
+<p>
+Nhân ngày Nhà giáo Việt Nam 20/11, em xin gửi đến thầy lời cảm ơn chân thành nhất.
+</p>
+<p>
+Cảm ơn thầy vì những bài học bổ ích, sự tận tâm và những kiến thức thầy đã truyền đạt cho chúng em.
+</p>
+<p>
+Cảm ơn thầy không chỉ vì những điều có trong sách vở mà còn vì những bài học, lời nhắc nhở và sự đồng hành trên hành trình trưởng thành.
+</p>
+<p>
+Em chúc thầy luôn mạnh khỏe, hạnh phúc, thành công và luôn giữ được niềm đam mê với nghề giáo.
+</p>
+<p>
+Mong rằng mỗi ngày của thầy đều có thật nhiều niềm vui, những điều tốt đẹp và những học trò luôn biết trân trọng công sức của thầy!
+</p>
+<p class="signature">
+With all our gratitude ❤️
+</p>
+</div>
+
+<div class="final-code">
+SYSTEM MESSAGE:<br>
+YOUR DEDICATION IS PRICELESS.<br>
+YOUR LESSONS WILL ALWAYS REMAIN.<br>
+HAPPY VIETNAMESE TEACHERS' DAY!
+</div>
+
+<div style="font-size:27px;margin:20px">💐✨💐</div>
+<button class="btn" onclick="replay()">REPLAY MISSION ↻</button>
+</div>
+</section>
+
+<!-- MODAL -->
+<div id="modal">
+<div class="modalbox">
+<div class="symbol" id="modalIcon">✦</div>
+<h2 id="modalTitle">DATA UNLOCKED</h2>
+<p id="modalText"></p>
+<button class="btn" onclick="closeModal()">CONTINUE →</button>
+</div>
+</div>
+
+<script>
+// CLOCK
+function updateClock(){
+document.getElementById('clock').textContent=
+new Date().toLocaleTimeString('vi-VN',{hour12:false});
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// STARS
+const sky=document.getElementById('stars');
+for(let i=0;i<160;i++){
+let s=document.createElement('i');
+s.className='star';
+s.style.left=Math.random()*100+'%';
+s.style.top=Math.random()*100+'%';
+s.style.animationDelay=Math.random()*4+'s';
+s.style.opacity=Math.random();
+sky.appendChild(s);
+}
+
+// BOOT TERMINAL
+const bootText=[
+'> Establishing secure connection...',
+'> Searching gratitude database...',
+'> Teacher identity detected.',
+'> Recovering 3 encrypted messages...',
+'> Preparing a special surprise...',
+'> ALL SYSTEMS READY.'
+];
+let line=0;
+function typeBoot(){
+if(line<bootText.length){
+document.getElementById('terminal').textContent+=bootText[line]+'\n';
+line++;
+setTimeout(typeBoot,550);
+}else{
+document.getElementById('start').disabled=false;
+}
+}
+setTimeout(typeBoot,600);
+
+// NAVIGATION
+function go(id){
+document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+window.scrollTo(0,0);
+}
+
+// QUESTIONS
+const questions=[
+{
+title:'THE POWER OF KNOWLEDGE',
+q:'Điều gì là món quà quý giá nhất mà một người thầy có thể trao cho học trò?',
+a:[
+'A. Chỉ là điểm số thật cao',
+'B. Kiến thức và cách tư duy',
+'C. Một chiếc máy tính mới'
+],
+correct:1,
+note:'Kiến thức không chỉ nằm trong sách vở. Những điều thầy dạy sẽ trở thành hành trang theo chúng em trên chặng đường dài.'
+},
+{
+title:'THE POWER OF GRATITUDE',
+q:'Điều gì chúng em muốn gửi đến thầy nhất trong ngày 20/11?',
+a:[
+'A. Một lời cảm ơn chân thành',
+'B. Một bài kiểm tra khó',
+'C. Một đống bài tập về nhà'
+],
+correct:0,
+note:'Có những lời cảm ơn đôi khi chưa được nói ra, nhưng chúng em luôn trân trọng những điều thầy đã làm.'
+},
+{
+title:'THE POWER OF WISHES',
+q:'Món quà nào xứng đáng dành cho thầy trong ngày hôm nay?',
+a:[
+'A. Thật nhiều áp lực',
+'B. Thật nhiều bài kiểm tra',
+'C. Sức khỏe, niềm vui và hạnh phúc'
+],
+correct:2,
+note:'Điều chúng em mong nhất là thầy luôn khỏe mạnh, vui vẻ và hạnh phúc với hành trình của mình.'
+}
+];
+
+let done=[false,false,false];
+let current=0;
+let moving=false;
+
+function begin(){go('mission')}
+
+function challenge(i){
+if(done[i]){
+showModal('🔓','Dữ liệu này đã được giải mã trước đó!',false);
+return;
+}
+current=i;
+moving=false;
+
+let q=questions[i];
+document.getElementById('qtag').textContent='DATA 0'+(i+1);
+document.getElementById('qtitle').textContent=q.title;
+document.getElementById('question').textContent=q.q;
+document.getElementById('qcount').textContent='QUESTION 0'+(i+1)+' / 03';
+document.getElementById('qprogress').style.width=((i+1)/3*100)+'%';
+document.getElementById('result').textContent='';
+
+let area=document.getElementById('answers');
+area.innerHTML='';
+
+q.a.forEach((answer,j)=>{
+let b=document.createElement('button');
+b.textContent=answer;
+b.onclick=()=>answerQuestion(j,b);
+area.appendChild(b);
+});
+
+go('challenge');
+}
+
+function answerQuestion(j,button){
+if(moving)return;
+let q=questions[current];
+
+if(j!==q.correct){
+button.classList.add('wrong');
+document.getElementById('result').textContent='✕ ACCESS DENIED — THỬ LẠI NHÉ!';
+document.querySelector('.challenge-card').classList.remove('shake');
+void document.querySelector('.challenge-card').offsetWidth;
+document.querySelector('.challenge-card').classList.add('shake');
+setTimeout(()=>button.classList.remove('wrong'),700);
+return;
+}
+
+moving=true;
+button.classList.add('correct');
+
+document.querySelectorAll('#answers button').forEach(b=>b.disabled=true);
+
+done[current]=true;
+let total=done.filter(Boolean).length;
+
+document.getElementById('task'+current).classList.add('done');
+document.querySelector('#task'+current+' .lock').textContent='✓';
+document.querySelector('#task'+current+' small').textContent='DATA RECOVERED';
+
+document.getElementById('bar').style.width=(total/3*100)+'%';
+document.getElementById('progressText').textContent=total+' / 3 UNLOCKED';
+
+document.getElementById('treasureBtn').disabled=total!==3;
+document.getElementById('treasureBtn').textContent=
+total===3?'ACCESS THE TREASURE 🎁':'ACCESS THE TREASURE 🔒';
+
+document.getElementById('result').textContent='✓ CORRECT! DATA RECOVERED';
+
+flash();
+
+setTimeout(()=>{
+showModal('✦ DATA UNLOCKED ✦',q.note,true);
+},500);
+}
+
+function flash(){
+let f=document.getElementById('flash');
+f.classList.remove('active');
+void f.offsetWidth;
+f.classList.add('active');
+}
+
+function showModal(title,text,advance=true){
+document.getElementById('modalTitle').textContent=title;
+document.getElementById('modalText').textContent=text;
+document.getElementById('modalIcon').textContent='🔓';
+document.getElementById('modal').dataset.advance=advance?'1':'0';
+document.getElementById('modal').classList.add('show');
+}
+
+function closeModal(){
+let m=document.getElementById('modal');
+if(!m.classList.contains('show'))return;
+m.classList.remove('show');
+
+if(m.dataset.advance==='1'){
+if(current<questions.length-1){
+challenge(current+1);
+}else{
+go('mission');
+}
+}
+}
+
+// GIFT
+function openGift(){
+flash();
+go('final');
+fireworks();
+}
+
+// REPLAY
+function replay(){
+done=[false,false,false];
+current=0;
+moving=false;
+
+for(let i=0;i<3;i++){
+document.getElementById('task'+i).classList.remove('done');
+document.querySelector('#task'+i+' .lock').textContent='🔒';
+document.querySelector('#task'+i+' small').textContent=[
+'Khám phá giá trị tri thức',
+'Lời cảm ơn chưa nói',
+'Điều ước đặc biệt'
+][i];
+}
+document.getElementById('bar').style.width='0%';
+document.getElementById('progressText').textContent='0 / 3 UNLOCKED';
+document.getElementById('treasureBtn').disabled=true;
+document.getElementById('treasureBtn').textContent='ACCESS THE TREASURE 🔒';
+go('mission');
+}
+
+// FIREWORKS
+function fireworks(){
+let canvas=document.getElementById('fireworks');
+let c=canvas.getContext('2d');
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+let particles=[];
+const colors=['#64f8ed','#ffdc91','#ffffff','#a78bfa','#62aaff'];
+
+function burst(x,y){
+for(let i=0;i<65;i++){
+let a=Math.random()*Math.PI*2;
+let speed=Math.random()*5+1;
+particles.push({
+x,y,
+vx:Math.cos(a)*speed,
+vy:Math.sin(a)*speed,
+life:1,
+color:colors[Math.floor(Math.random()*colors.length)],
+size:Math.random()*3+1
+});
+}
+}
+
+let count=0;
+function draw(){
+c.clearRect(0,0,canvas.width,canvas.height);
+particles.forEach((p,i)=>{
+p.x+=p.vx;
+p.y+=p.vy;
+p.vy+=.035;
+p.life-=.012;
+c.globalAlpha=Math.max(0,p.life);
+c.fillStyle=p.color;
+c.beginPath();
+c.arc(p.x,p.y,p.size,0,Math.PI*2);
+c.fill();
+});
+particles=particles.filter(p=>p.life>0);
+c.globalAlpha=1;
+
+if(count%35===0 && count<230){
+burst(Math.random()*canvas.width,Math.random()*canvas.height*.65);
+}
+count++;
+
+if(count<300)requestAnimationFrame(draw);
+else c.clearRect(0,0,canvas.width,canvas.height);
+}
+draw();
+}
+
+// MUSIC
+let ac=null,on=false,timer=null;
+function musicToggle(){
+if(on){
+clearInterval(timer);
+ac.close();
+ac=null;
+on=false;
+document.getElementById('music').textContent='♫ SOUND: OFF';
+return;
+}
+
+let AC=window.AudioContext||window.webkitAudioContext;
+if(!AC)return;
+
+ac=new AC();
+on=true;
+document.getElementById('music').textContent='♫ SOUND: ON';
+
+let notes=[261,329,392,523,392,329,293,349,440,523,440,349];
+let n=0;
+
+function note(){
+if(!ac||ac.state==='closed')return;
+let o=ac.createOscillator();
+let g=ac.createGain();
+o.type='triangle';
+o.frequency.value=notes[n++%notes.length];
+g.gain.setValueAtTime(.0001,ac.currentTime);
+g.gain.exponentialRampToValueAtTime(.025,ac.currentTime+.05);
+g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.4);
+o.connect(g);
+g.connect(ac.destination);
+o.start();
+o.stop(ac.currentTime+.45);
+}
+note();
+timer=setInterval(note,480);
+}
+</script>
+</body>
+</html>
+
